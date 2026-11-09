@@ -5,7 +5,7 @@ on:
   push:
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.50
-    branches: [ master ]
+    branches: [ master, feature/inmp441-i2s-audio ]
   pull_request:
     branches: [ master ]
 
@@ -18,17 +18,17 @@ defaults:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       BUILDROOT_DIR: 'buildroot'
 
     strategy:
       matrix:
-        raspberry: ['raspberrypi0', 'raspberrypi0w', 'raspberrypi4']
+        raspberry: ['raspberrypi0', 'raspberrypi0w']
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: 'recursive'
@@ -43,14 +43,14 @@ jobs:
 
       - name: Cache Build
         id: restore-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             output
             buildroot
           # Stupid hack to invalidate cache from UI
           # https://github.com/actions/cache/issues/2#issuecomment-673493515
-          key: ${{ matrix.raspberry }}-${{ env.BUILDROOT_DIR }}-${{ env.BUILDROOT_VERSION }}-${{ secrets.CACHE_VERSION }}
+          key: ${{ matrix.raspberry }}-${{ env.BUILDROOT_DIR }}-${{ env.BUILDROOT_VERSION }}-inmp441-${{ hashFiles('board/linux-base.config', 'configs/config', 'board/inmp441-overlay.dts', 'board/post-image.sh') }}-${{ secrets.CACHE_VERSION }}
 
       # Github Actions are sometimes blocked from this mirror
       # https://github.com/actions/virtual-environments/issues/2577
@@ -65,7 +65,7 @@ jobs:
           cp output/${{ matrix.raspberry }}/images/sdcard.img sdcard-${{ matrix.raspberry }}-${{ env.SMW_VERSION }}.img
 
       - name: Upload Image
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: sdcard-${{ matrix.raspberry }}-${{ env.SMW_VERSION }}.img
           path: sdcard-${{ matrix.raspberry }}-${{ env.SMW_VERSION }}.img
