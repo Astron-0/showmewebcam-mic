@@ -106,6 +106,21 @@ __EOF__
 
 done
 
+
+# Build and enable the INMP441 I2S microphone overlay on Raspberry Pi Zero.
+if [[ "${BOARDNAME}" == "raspberrypi0" || "${BOARDNAME}" == "raspberrypi0w" ]]; then
+    OVERLAY_DIR="${BINARIES_DIR}/rpi-firmware/overlays"
+    CONFIG_TXT="${BINARIES_DIR}/rpi-firmware/config.txt"
+    mkdir -p "${OVERLAY_DIR}"
+    test -x "${HOST_DIR}/bin/dtc"
+    "${HOST_DIR}/bin/dtc" -@ -I dts -O dtb -o "${OVERLAY_DIR}/inmp441.dtbo" "${BR2_EXTERNAL_PICAM_PATH}/board/inmp441-overlay.dts"
+    if ! grep -q "^dtparam=i2s=on$" "${CONFIG_TXT}"; then
+        echo "dtparam=i2s=on" >> "${CONFIG_TXT}"
+    fi
+    if ! grep -q "^dtoverlay=inmp441$" "${CONFIG_TXT}"; then
+        echo "dtoverlay=inmp441" >> "${CONFIG_TXT}"
+    fi
+fi
 # Pass an empty rootpath. genimage makes a full copy of the given rootpath to
 # ${GENIMAGE_TMP}/root so passing TARGET_DIR would be a waste of time and disk
 # space. We don't rely on genimage to build the rootfs image, just to insert a
