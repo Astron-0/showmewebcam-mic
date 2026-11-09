@@ -62,6 +62,8 @@ jobs:
           # Force a piwebcam rebuild every time
           rm -fr output/*/build/piwebcam*
           sh build-showmewebcam.sh ${{ matrix.raspberry }}
+          test -x "output/${{ matrix.raspberry }}/target/usr/bin/arecord"
+          test -s "output/${{ matrix.raspberry }}/images/rpi-firmware/overlays/inmp441.dtbo"
           cp output/${{ matrix.raspberry }}/images/sdcard.img sdcard-${{ matrix.raspberry }}-${{ env.SMW_VERSION }}.img
 
       - name: Upload Image
