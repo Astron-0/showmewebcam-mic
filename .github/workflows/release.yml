@@ -31,11 +31,10 @@ jobs:
           fetch-depth: 0
           submodules: 'recursive'
 
-      - name: Fetch Git Tag History
+      - name: Set build version identifiers
         run: |
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-          echo "SMW_VERSION=$(buildroot/support/scripts/setlocalversion)" >> $GITHUB_ENV
-          echo "BUILDROOT_VERSION=$(git rev-parse --short HEAD:${BUILDROOT_DIR})" >> $GITHUB_ENV
+          echo "SMW_VERSION=$(git describe --tags --always)" >> "$GITHUB_ENV"
+          echo "BUILDROOT_VERSION=$(git -C buildroot rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
       - name: Cache Build
         id: restore-cache
